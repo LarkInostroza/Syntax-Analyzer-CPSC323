@@ -39,95 +39,121 @@ int peek() {
 // Parse the input string
 void parseInput(string input) {
     push(0);
-    input += "$";
+    //input += "$"; Taken out since string already includes $
     int pos = 0;
+    
     while (true) {
         int state = peek();
         char symbol = input[pos];
         string action = parsingTable[state][symbol];
-        /*
-        if (action == "-1") {
-            cout << "String is not accepted." << endl;
-            return;
-        } */
+        cout << "State : " << state << endl;
+        cout << "Symbol: " << symbol <<endl;
         if (action == "acc") {
             cout << "String is accepted." << endl;
             return;
         } 
+        //Shift action based on S#. EX: S5 shifts 5
         else if (action[0] == 'S') {
-            push(symbol);
-            push(stoi(action.substr(1)));
+            char nextSymbol = input[pos];
+            push(nextSymbol); 
+            int newState = stoi(action.substr(1));
+            push(newState);
             pos++;
+            if (input[pos] == 'd'){
+                pos++;
+            }
         }
+            
         else if (action[0] == 'R') {
             int ruleNum = stoi(action.substr(1));
-            int newState = ruleNum;
-            //Perform reduction (Needs to be shuffled around)
+            //Perform reduction
             switch (ruleNum) {
                 case 1:
-                    //F -> id
-                    pop(); // Pop id
-                    pop(); // Pop F
-                    push(1); // Push non-terminal T
-                    break;
-                case 2:
-                    //T -> T * F
-                    pop(); //Pop F
-                    pop(); //Pop *
-                    pop(); //Pop T
-                    pop(); //Pop F
-                    pop(); //Pop *
-                    pop(); //Pop T
-                    push(1); //Push non-terminal T
-                    break;
-                case 3:
-                    //T -> F
-                    pop(); //Pop F
-                    pop(); //Pop T
-                    push(1); //Push non-terminal T
-                    break;
-                case 4:
-                    //F -> ( E )
-                    pop(); //Pop )
-                    pop(); //Pop E
-                    pop(); //Pop (
-                    pop(); //Pop F
-                    push(1); //Push non-terminal T
-                    break;
-                case 5:
                     //E -> E + T
                     pop(); //Pop T
-                    pop(); //Pop +
+                    pop(); //Pop '+'
                     pop(); //Pop E
+                    push('E'); //Push non-term E
+                    break;
+                case 2:
+                    //E -> T
                     pop(); //Pop T
-                    push(1); //Push non-terminal T
+                    push('E'); //Push non-term E
+                    break;
+                case 3:
+                    //T -> T * F
+                    pop(); //Pop F
+                    pop(); //Pop '*'
+                    pop(); //Pop T
+                    push('T'); //Push non-term T
+                    break;
+                case 4:
+                    //T -> F
+                    pop(); //Pop F
+                    push('T'); //Push non-term T
+                    break;
+                case 5:
+                    //F -> (E)
+                    pop(); //Pop ')'
+                    pop(); //Pop E
+                    pop(); //Pop '('
+                    push('F'); //Push non-term F
+                    break;
+                case 6:
+                    //F -> id
+                    pop(); //Pop id
+                    push('F'); //Push non-term F
                     break;
                 default:
-                    cout << "Error: Invalid reduction rule" << endl;
+                    cout << "Error: Invalid reduction rule: "<< ruleNum << endl;
                     return;
-            }
-            //Determine new state based on the current state & nonterminal pushed
-            //The code below is like putting duct tape because on a leaky pipe. Not a good solution
-            auto newStateStr = parsingTable[peek()][action[0]];
-            if (!newStateStr.empty()) {
-                newState = stoi(newStateStr);
-                push(newState); //Push the new state
-            } 
-            else {
-                cout << "Error: Invalid new state" << endl;
-                return;
             }
         }
 
-        //ETF not implemented yet
-        else if (action[0] == 'E') {
-            
+        //Reduction for E
+        else if (action[0] == 'E') {    
+            char nextSymbol = input[pos];
+            if (nextSymbol == '+' || nextSymbol == ')' || nextSymbol == '$') {
+                pop(); //Pop T
+                pop(); //Pop '+'
+                pop(); //Pop E
+                push('E'); //Push non-term E
+            } 
+            else {
+                cout << "Error: Invalid action E" << endl;
+                return;
+            }
         }
+        //Reduction for T
         else if (action[0] == 'T') {
-            
+            char nextSymbol = input[pos];
+            if (nextSymbol == '+' || nextSymbol == '*' || nextSymbol == ')' || nextSymbol == '$') {
+                pop(); //Pop F
+                pop(); //Pop '*'
+                pop(); //Pop T
+                push('T'); //Push non-term T
+            } 
+            else {
+                cout << "Error: Invalid action T" << endl;
+                return;
+            }
         }
-        else if (action[0] == 'F') {
-            
+        //Reduction for F
+        else if (action[0] == 'F') {  
+            char nextSymbol = input[pos];
+            if (nextSymbol == '+' || nextSymbol == '*' || nextSymbol == ')' || nextSymbol == '$') {
+                pop(); //Pop id || ')'
+                if (input[pos - 1] == '(') {
+                    pop(); //Pop '('
+                    pop(); //Pop E
+                    pop(); //Pop ')'
+                }
+                push('F'); //Push non-term F
+            } 
+            else {
+                cout << "Error: Invalid action F" << endl;
+                return;
+            }
         }
         else {
             cout << "Error: Invalid action" << endl;
@@ -141,7 +167,10 @@ int main() {
     for (auto& testCase : testCases) {
         cout << "Input: " << testCase << endl;
         parseInput(testCase);
-        while (!st.empty()) st.pop();
+        while (!st.empty()) {
+            st.pop();
+        }
     }
+    
     return 0;
 }
