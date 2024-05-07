@@ -109,7 +109,7 @@ void parseInput(string input) {
 
     // Reduction for E
     else if (action[0] == 'E') {
-      cout << "Fired" << endl;
+      cout << "Fired Reduction for E" << endl;
       char nextSymbol = input[pos];
       if (nextSymbol == '+' || nextSymbol == ')' || nextSymbol == '$') {
         pop();     // Pop T
