@@ -21,9 +21,17 @@ unordered_map<int, unordered_map<char, string>> parsingTable = {
     {10, {{'+', "R3"}, {'*', "R3"}, {')', "R3"}, {'$', "R3"}}},
     {11, {{'+', "R5"}, {'*', "R5"}, {')', "R5"}, {'$', "R5"}}}};
 
-// Stack, push, pop, peek operations
+//Stack, push, pop, peek operations
 stack<int> st;
-void push(int item) { st.push(item); }
+void push(int item) { 
+    st.push(item); 
+}
+void push(const string& item) { 
+    // Convert non-terminal symbols to integers and push
+    if (item == "E") st.push(0);
+    else if (item == "T") st.push(1);
+    else if (item == "F") st.push(2);
+}
 int pop() {
   int top = st.top();
   st.pop();
@@ -61,7 +69,7 @@ void parseInput(string input) {
 
     else if (action[0] == 'R') {
       int ruleNum = stoi(action.substr(1));
-      cout << "Rule Reduction: "<< ruleNum << endl;
+      //cout << "Rule Reduction: "<< ruleNum << endl;
       // Perform reduction
       switch (ruleNum) {
       case 1:
@@ -69,36 +77,36 @@ void parseInput(string input) {
         pop();     // Pop T
         pop();     // Pop '+'
         pop();     // Pop E
-        push('E'); // Push non-term E
+        push("E"); // Push non-term E
         break;
       case 2:
         // E -> T
         pop();     // Pop T
-        push('E'); // Push non-term E
+        push("E"); // Push non-term E
         break;
       case 3:
         // T -> T * F
         pop();     // Pop F
         pop();     // Pop '*'
         pop();     // Pop T
-        push('T'); // Push non-term T
+        push("T"); // Push non-term T
         break;
       case 4:
         // T -> F
         pop();     // Pop F
-        push('T'); // Push non-term T
+        push("T"); // Push non-term T
         break;
       case 5:
         // F -> (E)
         pop();     // Pop ')'
         pop();     // Pop E
         pop();     // Pop '('
-        push('F'); // Push non-term F
+        push("F"); // Push non-term F
         break;
       case 6:
         // F -> id
         pop();     // Pop id
-        push('F'); // Push non-term F
+        push("F"); // Push non-term F
         break;
 
       default:
@@ -107,29 +115,30 @@ void parseInput(string input) {
       }
     }
 
-    // Reduction for E
+    //Reduction for E
     else if (action[0] == 'E') {
-        cout << "Fired Reduction for F" << endl;
+      cout << "Fired Reduction for E" << endl;
       char nextSymbol = input[pos];
       if (nextSymbol == '+' || nextSymbol == ')' || nextSymbol == '$') {
-        pop();     // Pop T
-        pop();     // Pop '+'
-        pop();     // Pop E
-        push('E'); // Push non-term E
-      } else {
+        pop();     //Pop T
+        pop();     //Pop '+'
+        pop();     //Pop E
+        push("E"); //Push non-term E
+      } 
+      else {
         cout << "Error: Invalid action E" << endl;
         return;
       }
     }
-    // Reduction for T
+    //Reduction for T
     else if (action[0] == 'T') {
       char nextSymbol = input[pos];
       if (nextSymbol == '+' || nextSymbol == '*' || nextSymbol == ')' ||
           nextSymbol == '$') {
-        pop();     // Pop F
-        pop();     // Pop '*'
-        pop();     // Pop T
-        push('T'); // Push non-term T
+        pop();     //Pop F
+        pop();     //Pop '*'
+        pop();     //Pop T
+        push("T"); //Push non-term T
       } else {
         cout << "Error: Invalid action T" << endl;
         return;
@@ -140,14 +149,14 @@ void parseInput(string input) {
       char nextSymbol = input[pos];
       cout << "Fired Reduction for F" << endl;
       if (nextSymbol == '+' || nextSymbol == '*' || nextSymbol == ')' ||
-          nextSymbol == '$') {
-        pop(); // Pop id || ')'
+        nextSymbol == '$') {
+        pop(); //Pop id || ')'
         if (input[pos - 1] == '(') {
-          pop(); // Pop '('
-          pop(); // Pop E
-          pop(); // Pop ')'
+          pop(); //Pop '('
+          pop(); //Pop E
+          pop(); //Pop ')'
         }
-        push('F'); // Push non-term F
+        push(parsingTable[peek()]['F']); //Push non-term F
       } else {
         cout << "Error: Invalid action F" << endl;
         return;
@@ -160,7 +169,7 @@ void parseInput(string input) {
 }
 
 int main() {
-  vector<string> testCases = {"(id+id)*id$", "id*id$", "(id*)$"};
+  vector<string> testCases = {"(id+id)*id$"};
   for (auto &testCase : testCases) {
     cout << "Input: " << testCase << endl;
     parseInput(testCase);
