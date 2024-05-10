@@ -9,7 +9,7 @@ Program will be able to parse the given strings to identify whether or not they 
 
 
 ## Program Execution Instructions
-Be sure one's able to run C++ code on the system. Be sure the input file is in the same folder as this program file.
+Be sure one's able to run C++ code on the system. Be sure the input file is in the same folder as this program file. Run main.cpp with a C++ compatible terminal or IDE.
 
 
 ## Meta:
