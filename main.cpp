@@ -176,7 +176,7 @@ void parseInput(string input) {
 }
 
 int main() {
-  vector<string> testCases = {"(i+i)*i$"};
+  vector<string> testCases = {"i+$"};
   try {
     for (auto &testCase : testCases) {
       cout << "Input: " << testCase << endl;
